@@ -13,7 +13,7 @@ class Pump:
         return self.runtime < self.desired_runtime
     
     def can_run(self, available_power):
-        return available_power > self.power
+        return available_power >= self.power
     
     def turn_on(self):
         print(f'Starting pump {self.name}')
