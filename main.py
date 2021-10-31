@@ -1,22 +1,35 @@
 from envoy import Envoy
 from pump import Pump
 from time import sleep
+try:
+    import RPi.GIO as GPIO
+except ImportError:
+    emulate_pi = True
+
+if not emulate_pi:
+    GPIO.setmode(GPIO.BOARD)
 
 device = Envoy('192.168.10.12')
-# 1kWh, 4 hours per day
-pump1 = Pump('Main', 1000, 4 * 3600)
-# 1kWh, 1 hour per day
-pump2 = Pump('Polaris', 1000, 1 * 3600)
+pumps = []
+config = [ { 'name': 'Main', 'power': 1000, 'desired_runtime': 4 * 3600 },
+           { 'name': 'Polaris', 'power': 1000, 'desired_runtime': 1 * 3600 } ]
+
+for c in config:
+    pumps.append(Pump(c['name'], c['power'], c['desired_runtime']))
+
+# FIXME
+pumps[1].chain(pumps[0])
 
 while True:
-    pump1.update()
-    pump2.update()
-    if pump1.should_run():
-        device.update()
-        print(f'Production: {device.production}wH')
-        print(f'Consumption: {device.consumption}wH')
-        if pump1.can_run(device.production - device.consumption):
-            pump1.turn_on()
-            if pump2.should_run and pump2.can_run(device.production - device.consumption):
-                pump2.turn_on()
+    pumps_to_start = []
+    for p in pumps:
+        p.update()
+    device.update()
+    print(f'Production: {device.production}wH')
+    print(f'Consumption: {device.consumption}wH')
+    for p in pumps:
+        if p.should_run() and p.can_run(device.production - device.consumption):
+            pumps_to_start.append(p)
+    for p in pumps_to_start:
+        p.turn_on()
     sleep(60)
