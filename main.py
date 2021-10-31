@@ -1,8 +1,19 @@
 from envoy import Envoy
 from pump import Pump
+
 from time import sleep
 import signal
 import sys
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("debug.log"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 emulate_pi = False
 
@@ -12,7 +23,7 @@ except ImportError:
     emulate_pi = True
 
 def signal_handler(sig, frame):
-    print('Exiting cleanly')
+    logging.info('Exiting cleanly')
     if not emulate_pi:
         GPIO.cleanup()
     sys.exit(0)
@@ -38,8 +49,8 @@ while True:
     for p in pumps:
         p.update()
     device.update()
-    print(f'Production: {device.production}wH')
-    print(f'Consumption: {device.consumption}wH')
+    logging.debug(f'Production: {device.production}wH')
+    logging.debug(f'Consumption: {device.consumption}wH')
     for p in pumps:
         if p.should_run() and p.can_run(device.production - device.consumption):
             pumps_to_start.append(p)

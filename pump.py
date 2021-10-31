@@ -1,4 +1,5 @@
 import time
+import logging
 
 emulate_pi = False
 
@@ -23,7 +24,7 @@ class Pump:
         self.GPIO_ID = GPIO_ID
 
         if self.GPIO_ID and not emulate_pi:
-            print(f'Setting up GPIO {self.GPIO_ID} for pump {self.name}')
+            logging.debug(f'Setting up GPIO {self.GPIO_ID} for pump {self.name}')
             GPIO.setup(self.GPIO_ID, GPIO.OUT)
     
     def should_run(self):
@@ -46,20 +47,20 @@ class Pump:
     
     def turn_on(self):
         if not self.is_running():
-            print(f'Starting pump {self.name}')
+            logging.info(f'Starting pump {self.name}')
             # Call GPIO to turn the pump on
             if self.GPIO_ID and not emulate_pi:
-                print(f'Setting GPIO {self.GPIO_ID} to False for pump {self.name}')
+                logging.debug(f'Setting GPIO {self.GPIO_ID} to False for pump {self.name}')
                 GPIO.output(self.GPIO_ID, False)
             self.on_since = time.time()
     
     def turn_off(self):
         if self.is_running():
             ran_for = time.time() - self.on_since
-            print(f'Stopping pump {self.name}, ran for {ran_for} seconds')
+            logging.info(f'Stopping pump {self.name}, ran for {ran_for} seconds')
             # Call GPIO to turn the pump off
             if self.GPIO_ID and not emulate_pi:
-                print(f'Setting GPIO {self.GPIO_ID} to True for pump {self.name}')
+                logging.debug(f'Setting GPIO {self.GPIO_ID} to True for pump {self.name}')
                 GPIO.output(self.GPIO_ID, True)
             self.runtime += ran_for
             self.on_since = None
@@ -70,4 +71,4 @@ class Pump:
             if self.runtime + ran_for >= self.desired_runtime:
                 self.turn_off()
 
-        print(f'Pump {self.name} updated')
+        logging.debug(f'Pump {self.name} updated')
