@@ -1,6 +1,8 @@
 from envoy import Envoy
 from pump import Pump
 from time import sleep
+import signal
+import sys
 
 emulate_pi = False
 
@@ -9,8 +11,13 @@ try:
 except ImportError:
     emulate_pi = True
 
-if not emulate_pi:
-    GPIO.setmode(GPIO.BOARD)
+def signal_handler(sig, frame):
+    print('Exiting cleanly')
+    if not emulate_pi:
+        GPIO.cleanup()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 device = Envoy('192.168.10.12')
 pumps = []
