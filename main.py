@@ -19,6 +19,9 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+if not emulate_pi:
+    GPIO.setmode(GPIO.BOARD)
+
 device = Envoy('192.168.10.12')
 pumps = []
 config = [ { 'name': 'Main', 'power': 1000, 'desired_runtime': 4 * 3600, 'GPIO_ID': 8 },
