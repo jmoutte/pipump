@@ -1,7 +1,9 @@
 import time
 
+emulate_pi = False
+
 try:
-    import RPi.GIO as GPIO
+    import RPi.GPIO as GPIO
 except ImportError:
     emulate_pi = True
 
@@ -21,6 +23,7 @@ class Pump:
         self.GPIO_ID = GPIO_ID
 
         if self.GPIO_ID and not emulate_pi:
+            print(f'Setting up GPIO {self.GPIO_ID} for pump {self.name}')
             GPIO.setup(self.GPIO_ID, GPIO.OUT)
     
     def should_run(self):
@@ -45,7 +48,8 @@ class Pump:
         if not self.is_running():
             print(f'Starting pump {self.name}')
             # Call GPIO to turn the pump on
-            if not emulate_pi:
+            if self.GPIO_ID and not emulate_pi:
+                print(f'Setting GPIO {self.GPIO_ID} to False for pump {self.name}')
                 GPIO.output(self.GPIO_ID, False)
             self.on_since = time.time()
     
@@ -54,7 +58,8 @@ class Pump:
             ran_for = time.time() - self.on_since
             print(f'Stopping pump {self.name}, ran for {ran_for} seconds')
             # Call GPIO to turn the pump off
-            if not emulate_pi:
+            if self.GPIO_ID and not emulate_pi:
+                print(f'Setting GPIO {self.GPIO_ID} to True for pump {self.name}')
                 GPIO.output(self.GPIO_ID, True)
             self.runtime += ran_for
             self.on_since = None

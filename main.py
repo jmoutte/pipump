@@ -1,8 +1,11 @@
 from envoy import Envoy
 from pump import Pump
 from time import sleep
+
+emulate_pi = False
+
 try:
-    import RPi.GIO as GPIO
+    import RPi.GPIO as GPIO
 except ImportError:
     emulate_pi = True
 
@@ -11,11 +14,11 @@ if not emulate_pi:
 
 device = Envoy('192.168.10.12')
 pumps = []
-config = [ { 'name': 'Main', 'power': 1000, 'desired_runtime': 4 * 3600 },
-           { 'name': 'Polaris', 'power': 1000, 'desired_runtime': 1 * 3600 } ]
+config = [ { 'name': 'Main', 'power': 1000, 'desired_runtime': 4 * 3600, 'GPIO_ID': 8 },
+           { 'name': 'Polaris', 'power': 1000, 'desired_runtime': 1 * 3600, 'GPIO_ID': 10 } ]
 
 for c in config:
-    pumps.append(Pump(c['name'], c['power'], c['desired_runtime']))
+    pumps.append(Pump(c['name'], c['power'], c['desired_runtime'], c['GPIO_ID']))
 
 # FIXME
 pumps[1].chain(pumps[0])
