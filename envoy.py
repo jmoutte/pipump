@@ -1,5 +1,5 @@
 import requests
-from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 from pvsystem import PVSystem
 
 class Envoy(PVSystem):
@@ -19,7 +19,10 @@ class Envoy(PVSystem):
         return None
 
     def update(self):
-        resp = requests.get(self.url)
-        data = resp.json()
-        self.consumption = self.__get_eim_watts(data['consumption'])
-        self.production = self.__get_eim_watts(data['production'])
+        try:
+            resp = requests.get(self.url)
+            data = resp.json()
+            self.consumption = self.__get_eim_watts(data['consumption'])
+            self.production = self.__get_eim_watts(data['production'])
+        except RequestException as e:
+            print(f'GET request on {self.url} triggered an exception {e.strerror}')
