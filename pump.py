@@ -1,5 +1,10 @@
 import time
 
+try:
+    import RPi.GIO as GPIO
+except ImportError:
+    emulate_pi = True
+
 class Pump:
     power = None
     name = None
@@ -7,11 +12,16 @@ class Pump:
     runtime = 0
     on_since = None
     chained_to = None
+    GPIO_ID = None
     
-    def __init__(self, name, power, runtime):
+    def __init__(self, name, power, runtime, GPIO_ID = None):
         self.power = power
         self.name = name
         self.desired_runtime = runtime
+        self.GPIO_ID = GPIO_ID
+
+        if self.GPIO_ID and not emulate_pi:
+            GPIO.setup(self.GPIO_ID, GPIO.OUT)
     
     def should_run(self):
         if self.chained_to and not self.chained_to.should_run():
@@ -32,16 +42,22 @@ class Pump:
         self.chained_to = pump
     
     def turn_on(self):
-        print(f'Starting pump {self.name}')
-        # Call GPIO to turn the pump on
-        self.on_since = time.time()
+        if not self.is_running():
+            print(f'Starting pump {self.name}')
+            # Call GPIO to turn the pump on
+            if not emulate_pi:
+                GPIO.output(self.GPIO_ID, False)
+            self.on_since = time.time()
     
     def turn_off(self):
-        ran_for = time.time() - self.on_since
-        print(f'Stopping pump {self.name}, ran for {ran_for} seconds')
-        # Call GPIO to turn the pump off
-        self.runtime += ran_for
-        self.on_since = None
+        if self.is_running():
+            ran_for = time.time() - self.on_since
+            print(f'Stopping pump {self.name}, ran for {ran_for} seconds')
+            # Call GPIO to turn the pump off
+            if not emulate_pi:
+                GPIO.output(self.GPIO_ID, True)
+            self.runtime += ran_for
+            self.on_since = None
 
     def update(self):
         if self.is_running():
