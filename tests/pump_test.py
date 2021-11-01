@@ -82,6 +82,22 @@ class TestPump(unittest.TestCase):
         pump.turn_off()
         self.assertIsNone(pump.on_since)
         self.assertEqual(pump.runtime, 0)
+    
+    def test_update_turns_off_at_desired_runtime(self):
+        pump = Pump('test_pump', 200, 10)
+        pump.turn_on()
+        self.emulated_time += 10
+        pump.update()
+        self.assertEqual(pump.runtime, 10)
+        self.assertFalse(pump.is_running())
+    
+    def test_update_resets_runtime_at_date_change(self):
+        pump = Pump('test_pump', 200, 10)
+        pump.turn_on()
+        self.emulated_time += 24 * 3600
+        pump.update()
+        self.assertEqual(pump.runtime, 0)
+        self.assertFalse(pump.is_running())
 
 class TestPumpChain(unittest.TestCase):
     def test_chain(self):

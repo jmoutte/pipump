@@ -1,5 +1,6 @@
 import time
 import logging
+from datetime import datetime
 
 emulate_pi = False
 
@@ -16,12 +17,14 @@ class Pump:
     on_since = None
     chained_to = None
     GPIO_ID = None
+    current_date = None
     
     def __init__(self, name, power, runtime, GPIO_ID = None):
         self.power = power
         self.name = name
         self.desired_runtime = runtime
         self.GPIO_ID = GPIO_ID
+        self.current_date = datetime.today().date()
 
         if self.GPIO_ID and not emulate_pi:
             logging.debug(f'Setting up GPIO {self.GPIO_ID} for pump {self.name}')
@@ -70,5 +73,11 @@ class Pump:
             ran_for = time.time() - self.on_since
             if self.runtime + ran_for >= self.desired_runtime:
                 self.turn_off()
+        
+        now = datetime.today().date()
+        if self.current_date != now:
+            # Reset counters
+            self.runtime = 0
+            self.current_date = now
 
         logging.debug(f'Pump {self.name} updated')
