@@ -42,18 +42,15 @@ for c in config:
 pumps[1].chain(pumps[0])
 
 while True:
-    pumps_to_start = []
-    pumps_to_stop = []
     for p in pumps:
         p.update()
-    device.update()
+    availability = device.update()
     for p in pumps:
-        if p.should_run() and p.can_run(device.production - device.consumption):
-            pumps_to_start.append(p)
+        start = False
+        if p.should_run():
+            start, availability = p.can_run(availability)
+        if start:
+            p.turn_on()
         else:
-            pumps_to_stop.append(p)
-    for p in pumps_to_start:
-        p.turn_on()
-    for p in pumps_to_stop:
-        p.turn_off()
+            p.turn_off()
     sleep(60)
