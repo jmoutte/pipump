@@ -50,8 +50,6 @@ while True:
     for p in pumps:
         p.update()
     device.update()
-    logging.debug(f'Production: {device.production}wH')
-    logging.debug(f'Consumption: {device.consumption}wH')
     for p in pumps:
         if p.should_run() and p.can_run(device.production - device.consumption):
             pumps_to_start.append(p)
