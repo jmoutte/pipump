@@ -16,9 +16,9 @@ logging.basicConfig(
 )
 
 emulate_pi = False
-
 try:
     import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.BOARD)
 except ImportError:
     emulate_pi = True
 
@@ -29,9 +29,6 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
-
-if not emulate_pi:
-    GPIO.setmode(GPIO.BOARD)
 
 device = Envoy('192.168.10.12')
 pumps = []
