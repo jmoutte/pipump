@@ -28,3 +28,5 @@ class Envoy(PVSystem):
             logging.debug(f'Production: {self.production}wH, Consumption: {self.consumption}wH')
         except RequestException as e:
             logging.error(f'GET request on {self.url} triggered an exception {e.strerror}')
+        # Return the latest value even in case of timeouts
+        return self.production - self.consumption
