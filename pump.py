@@ -3,7 +3,6 @@ import logging
 from datetime import datetime
 
 emulate_pi = False
-
 try:
     import RPi.GPIO as GPIO
 except ImportError:
@@ -60,7 +59,7 @@ class Pump:
     def turn_off(self):
         if self.is_running():
             ran_for = time.time() - self.on_since
-            logging.info(f'Stopping pump {self.name}, ran for {ran_for} seconds')
+            logging.info(f'Stopping pump {self.name}, ran for {ran_for} seconds, day runtime {self.runtime} seconds')
             # Call GPIO to turn the pump off
             if self.GPIO_ID and not emulate_pi:
                 logging.debug(f'Setting GPIO {self.GPIO_ID} to HIGH for pump {self.name}')
@@ -80,4 +79,4 @@ class Pump:
             self.runtime = 0
             self.current_date = now
 
-        logging.debug(f'Pump {self.name} updated')
+        logging.debug(f'Pump {self.name} updated, day runtime {self.runtime}, desired {self.desired_runtime}, running {self.is_running()}')
