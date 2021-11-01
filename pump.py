@@ -35,11 +35,21 @@ class Pump:
         return self.runtime < self.desired_runtime
     
     def can_run(self, available_power):
-        if self.is_running():
-            return available_power >= 0
         if self.chained_to:
-            return self.chained_to.can_run(available_power - self.power)
-        return available_power >= self.power
+            availability = available_power - self.power
+            if self.is_running():
+                availability = available_power
+            start, availability = self.chained_to.can_run(availability)
+            if start:
+                return True, available_power - self.power
+            else:
+                return False, available_power
+        if self.is_running():
+            return available_power >= 0, available_power
+        if available_power >= self.power:
+            return True, available_power - self.power
+        else:
+            return False, available_power
     
     def is_running(self):
         return self.on_since != None
