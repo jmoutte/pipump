@@ -25,7 +25,7 @@ class Pump:
 
         if self.GPIO_ID and not emulate_pi:
             logging.debug(f'Setting up GPIO {self.GPIO_ID} for pump {self.name}')
-            GPIO.setup(self.GPIO_ID, GPIO.OUT)
+            GPIO.setup(self.GPIO_ID, GPIO.OUT, initial=GPIO.HIGH)
     
     def should_run(self):
         if self.chained_to and not self.chained_to.should_run():
@@ -50,8 +50,8 @@ class Pump:
             logging.info(f'Starting pump {self.name}')
             # Call GPIO to turn the pump on
             if self.GPIO_ID and not emulate_pi:
-                logging.debug(f'Setting GPIO {self.GPIO_ID} to False for pump {self.name}')
-                GPIO.output(self.GPIO_ID, False)
+                logging.debug(f'Setting GPIO {self.GPIO_ID} to LOW for pump {self.name}')
+                GPIO.output(self.GPIO_ID, GPIO.LOW)
             self.on_since = time.time()
     
     def turn_off(self):
@@ -60,8 +60,8 @@ class Pump:
             logging.info(f'Stopping pump {self.name}, ran for {ran_for} seconds')
             # Call GPIO to turn the pump off
             if self.GPIO_ID and not emulate_pi:
-                logging.debug(f'Setting GPIO {self.GPIO_ID} to True for pump {self.name}')
-                GPIO.output(self.GPIO_ID, True)
+                logging.debug(f'Setting GPIO {self.GPIO_ID} to HIGH for pump {self.name}')
+                GPIO.output(self.GPIO_ID, GPIO.HIGH)
             self.runtime += ran_for
             self.on_since = None
 
