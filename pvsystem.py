@@ -1,3 +1,3 @@
 class PVSystem:
-    consumption = None
-    production = None
+    consumption = 0
+    production = 0
