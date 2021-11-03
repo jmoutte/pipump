@@ -21,7 +21,7 @@ class Envoy(PVSystem):
 
     def update(self):
         try:
-            resp = requests.get(self.url)
+            resp = requests.get(self.url, timeout=10)
             data = resp.json()
             self.consumption = self.__get_eim_watts(data['consumption'])
             self.production = self.__get_eim_watts(data['production'])
