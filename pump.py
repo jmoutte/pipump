@@ -85,8 +85,10 @@ class Pump:
         
         now = datetime.today().date()
         if self.current_date != now:
+            logging.debug(f'Date changed to next day for pump {self.name}, resetting counters and turning off if running')
+            self.turn_off()
             # Reset counters
             self.runtime = 0
-            self.current_date = now
+            self.current_date = now            
 
         logging.debug(f'Pump {self.name} updated, day runtime {self.runtime}, desired {self.desired_runtime}, running {self.is_running()}')

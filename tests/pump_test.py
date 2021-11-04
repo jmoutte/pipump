@@ -93,8 +93,17 @@ class TestPump(unittest.TestCase):
     
     def test_update_resets_runtime_at_date_change(self):
         pump = Pump('test_pump', 200, 10)
-        pump.turn_on()
+        pump.runtime = 5
         self.emulated_time += 24 * 3600
+        pump.update()
+        self.assertEqual(pump.runtime, 0)
+    
+    def test_update_turns_off_at_date_change(self):
+        pump = Pump('test_pump', 200, 3 * 3600)
+        self.emulated_time = time.mktime(
+                time.strptime("2020-01-18 23:30:00", "%Y-%m-%d %H:%M:%S"))
+        pump.turn_on()
+        self.emulated_time += 1 * 3600
         pump.update()
         self.assertEqual(pump.runtime, 0)
         self.assertFalse(pump.is_running())
