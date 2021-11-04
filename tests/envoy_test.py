@@ -30,7 +30,14 @@ class TestEnvoy(unittest.TestCase):
         with patch('envoy.requests') as mock_requests:
             mock_requests.get.side_effect = Timeout
             envoy.update()
-            mock_requests.get.assert_called_once_with('http://127.0.0.1/production.json')
+            mock_requests.get.assert_called_once()
+    
+    def test_update_requests_get_with_timeout(self):
+        envoy = Envoy('127.0.0.1')
+        with patch('envoy.requests') as mock_requests:
+            mock_requests.get.side_effect = Timeout
+            envoy.update()
+            mock_requests.get.assert_called_once_with('http://127.0.0.1/production.json', timeout=10)
     
     def test_update_returns_availability(self):
         envoy = Envoy('127.0.0.1')
@@ -38,4 +45,3 @@ class TestEnvoy(unittest.TestCase):
             mock_requests.get.side_effect = self.mocked_requests_get
             availability = envoy.update()
             self.assertEqual(availability, 100)
-            mock_requests.get.assert_called_once_with('http://127.0.0.1/production.json')
