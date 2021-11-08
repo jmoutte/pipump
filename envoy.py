@@ -23,9 +23,13 @@ class Envoy(PVSystem):
         try:
             resp = requests.get(self.url, timeout=10)
             data = resp.json()
-            self.consumption = self.__get_eim_watts(data['consumption'])
-            self.production = self.__get_eim_watts(data['production'])
-            logging.debug(f'Production: {self.production}wH, Consumption: {self.consumption}wH')
+            consumption = self.__get_eim_watts(data['consumption'])
+            production = self.__get_eim_watts(data['production'])
+            logging.debug(f'New reading: Production: {production}wH, Consumption: {consumption}wH')
+            # Update moving average in base class
+            self.consumption = consumption
+            self.production = production
+            logging.debug(f'Moving average: Production: {self.production}wH, Consumption: {self.consumption}wH')
         except RequestException as e:
             logging.error(f'GET request on {self.url} triggered an exception {e.strerror}')
         # Return the latest value even in case of timeouts

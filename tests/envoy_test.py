@@ -44,4 +44,4 @@ class TestEnvoy(unittest.TestCase):
         with patch('envoy.requests') as mock_requests:
             mock_requests.get.side_effect = self.mocked_requests_get
             availability = envoy.update()
-            self.assertEqual(availability, 100)
+            self.assertEqual(availability, envoy.production - envoy.consumption)
