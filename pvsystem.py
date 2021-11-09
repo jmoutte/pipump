@@ -9,7 +9,7 @@ class PVSystem:
     def consumption(self):
         if not len(self._consumption_readings):
             return 0
-        return mean(self._consumption_readings)
+        return round(mean(self._consumption_readings))
     
     @consumption.setter
     def consumption(self, value):
@@ -23,7 +23,7 @@ class PVSystem:
     def production(self):
         if not len(self._production_readings):
             return 0
-        return mean(self._production_readings)
+        return round(mean(self._production_readings))
     
     @production.setter
     def production(self, value):

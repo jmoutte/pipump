@@ -23,6 +23,15 @@ class TestPVSystem(unittest.TestCase):
             pvsystem.production = p
         self.assertEqual(pvsystem.consumption, 80)
         self.assertEqual(pvsystem.production, 80)
+    
+    def test_get_values_rounds(self):
+        pvsystem = PVSystem()
+        for c in [0, 3, 5]:
+            pvsystem.consumption = c
+        for p in [10, 13, 15]:
+            pvsystem.production = p
+        self.assertEqual(pvsystem.consumption, 3)
+        self.assertEqual(pvsystem.production, 13)
 
     def test_del_clears_moving_average(self):
         pvsystem = PVSystem()
