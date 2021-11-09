@@ -56,7 +56,7 @@ while True:
             start = False
             if p.should_run():
                 start, availability = p.can_run(availability)
-            if start:
+            if start and not p.is_running():
                 p.turn_on()
                 del device.consumption
     sleep(60)
