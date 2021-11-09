@@ -44,3 +44,8 @@ class TestPVSystem(unittest.TestCase):
         del pvsystem.consumption
         self.assertEqual(pvsystem.consumption, 0)
         self.assertEqual(pvsystem.production, 0)
+        for i in [0, 100, 200, 100, 0]:
+            pvsystem.consumption = i
+            pvsystem.production = i
+        self.assertEqual(pvsystem.consumption, 80)
+        self.assertEqual(pvsystem.production, 80)
