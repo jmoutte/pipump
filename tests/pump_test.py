@@ -114,6 +114,12 @@ class TestPumpChain(unittest.TestCase):
         pump2 = Pump('aux_pump', 200, 1 * 3600)
         pump2.chain(pump1)
         self.assertEqual(pump2.chained_to, pump1)
+
+    def test_is_chained(self):
+        pump1 = Pump('main_pump', 200, 3 * 3600)
+        pump2 = Pump('aux_pump', 200, 1 * 3600)
+        pump2.chain(pump1)
+        self.assertTrue(pump2.is_chained())
     
     def test_should_run(self):
         pump1 = Pump('main_pump', 200, 3 * 3600)
@@ -124,38 +130,34 @@ class TestPumpChain(unittest.TestCase):
         pump1.runtime = 3 * 3600
         self.assertFalse(pump1.should_run())
         self.assertFalse(pump2.should_run())
-    
-    def test_can_run_with_enough_power_when_off(self):
+
+    def test_can_not_run_alone(self):
         pump1 = Pump('main_pump', 200, 3 * 3600)
         pump2 = Pump('aux_pump', 200, 1 * 3600)
         pump2.chain(pump1)
-        self.assertEqual(pump1.can_run(300), (True, 100))
-        self.assertEqual(pump2.can_run(300), (False, 300))
-        self.assertEqual(pump2.can_run(450), (True, 250))
+        self.assertEqual(pump1.can_run(1000), (True, 800))
+        self.assertEqual(pump2.can_run(800), (False, 800))
+        pump1.turn_on()
+        self.assertEqual(pump1.can_run(1000), (True, 1000))
+        self.assertEqual(pump2.can_run(1000), (True, 800))
     
-    def test_can_run_with_enough_power_when_on(self):
+    def test_can_run_with_enough_power_when_off(self):
         pump1 = Pump('main_pump', 200, 3 * 3600)
         pump2 = Pump('aux_pump', 200, 1 * 3600)
         pump2.chain(pump1)
         pump1.turn_on()
         self.assertEqual(pump1.can_run(100), (True, 100))
         self.assertEqual(pump2.can_run(100), (False, 100))
-        self.assertEqual(pump2.can_run(200), (True, 0))
-        pump1.turn_off()
-        pump2.turn_on()
-        self.assertEqual(pump1.can_run(100), (False, 100))
-        self.assertEqual(pump2.can_run(100), (False, 100))
+        self.assertEqual(pump2.can_run(250), (True, 50))
     
-    def test_can_run_aux_before_main(self):
+    def test_can_run_with_enough_power_when_on(self):
         pump1 = Pump('main_pump', 200, 3 * 3600)
         pump2 = Pump('aux_pump', 200, 1 * 3600)
         pump2.chain(pump1)
-        start, availability = pump2.can_run(400)
-        self.assertTrue(start)
-        self.assertEqual(availability, 200)
-        start, availability = pump1.can_run(availability)
-        self.assertTrue(start)
-        self.assertEqual(availability, 0)
+        pump1.turn_on()
+        pump2.turn_on()
+        self.assertEqual(pump1.can_run(100), (True, 100))
+        self.assertEqual(pump2.can_run(100), (True, 100))
 
     def test_can_run_main_before_aux(self):
         pump1 = Pump('main_pump', 200, 3 * 3600)
@@ -169,17 +171,6 @@ class TestPumpChain(unittest.TestCase):
         self.assertTrue(start)
         self.assertEqual(availability, 0)
 
-    def test_can_run_aux_before_main_not_enough_power(self):
-        pump1 = Pump('main_pump', 200, 3 * 3600)
-        pump2 = Pump('aux_pump', 200, 1 * 3600)
-        pump2.chain(pump1)
-        start, availability = pump2.can_run(300)
-        self.assertFalse(start)
-        self.assertEqual(availability, 300)
-        start, availability = pump1.can_run(availability)
-        self.assertTrue(start)
-        self.assertEqual(availability, 100)
-
     def test_can_run_main_before_aux_not_enough_power(self):
         pump1 = Pump('main_pump', 200, 3 * 3600)
         pump2 = Pump('aux_pump', 200, 1 * 3600)
@@ -187,6 +178,7 @@ class TestPumpChain(unittest.TestCase):
         start, availability = pump1.can_run(300)
         self.assertTrue(start)
         self.assertEqual(availability, 100)
+        pump1.turn_on()
         start, availability = pump2.can_run(availability)
         self.assertFalse(start)
         self.assertEqual(availability, 100)

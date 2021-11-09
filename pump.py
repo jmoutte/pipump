@@ -36,26 +36,33 @@ class Pump:
     
     def can_run(self, available_power):
         if self.chained_to:
-            availability = available_power - self.power
+            # We can only run when our upstream pump already runs
+            if not self.chained_to.is_running():
+                return False, available_power
             if self.is_running():
-                availability = available_power
-            start, availability = self.chained_to.can_run(availability)
-            if start:
+                return available_power >= 0, available_power
+            else:
+                start, availability = self.chained_to.can_run(available_power - self.power)
+                if start:
+                    return True, available_power - self.power
+                else:
+                    return False, available_power
+        else:
+            if self.is_running():
+                return available_power >= 0, available_power
+            if available_power >= self.power:
                 return True, available_power - self.power
             else:
                 return False, available_power
-        if self.is_running():
-            return available_power >= 0, available_power
-        if available_power >= self.power:
-            return True, available_power - self.power
-        else:
-            return False, available_power
     
     def is_running(self):
         return self.on_since != None
     
     def chain(self, pump):
         self.chained_to = pump
+    
+    def is_chained(self):
+        return self.chained_to != None
     
     def turn_on(self):
         if not self.is_running():
