@@ -76,7 +76,7 @@ class Pump:
     def turn_off(self):
         if self.is_running():
             ran_for = time.time() - self.on_since
-            logging.info(f'Stopping pump {self.name}, ran for {ran_for} seconds, day runtime {self.runtime} seconds')
+            logging.info(f'Stopping pump {self.name}, ran for {round(ran_for)} seconds, day runtime {round(self.runtime)} seconds')
             # Call GPIO to turn the pump off
             if self.GPIO_ID and not emulate_pi:
                 logging.debug(f'Setting GPIO {self.GPIO_ID} to HIGH for pump {self.name}')
@@ -98,4 +98,4 @@ class Pump:
             self.runtime = 0
             self.current_date = now            
 
-        logging.debug(f'Pump {self.name} updated, day runtime {self.runtime}, desired {self.desired_runtime}, running {self.is_running()}')
+        logging.debug(f'Pump {self.name} updated, day runtime {round(self.runtime)}, desired {self.desired_runtime}, running {self.is_running()}')
