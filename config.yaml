@@ -1,0 +1,21 @@
+mqtt:
+  uid: 00000000de242b87
+  host: 192.168.10.11
+  #port: 1883
+  #username:
+  #password:
+  #discovery: True
+  #discovery_prefix: homeassistant
+pvsystem:
+  type: envoy
+  ip: 192.168.10.12
+pumps:
+  - name: Main
+    power: 1650
+    runtime: 3
+    gpio: 8
+  - name: Polaris
+    power: 1100
+    runtime: 0.5
+    gpio: 10
+    chained: Main
