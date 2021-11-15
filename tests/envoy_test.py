@@ -22,8 +22,8 @@ class TestEnvoy(unittest.TestCase):
 
     def test_url(self):
         envoy = Envoy('127.0.0.1')
-        self.assertEqual(envoy.ip, '127.0.0.1')
-        self.assertEqual(envoy.url, 'http://127.0.0.1/production.json')
+        self.assertEqual(envoy._ip, '127.0.0.1')
+        self.assertEqual(envoy._url, 'http://127.0.0.1/production.json')
     
     def test_update_absorbs_timeout(self):
         envoy = Envoy('127.0.0.1')
