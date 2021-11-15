@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock
 import time
 
 from pump import Pump
@@ -107,6 +108,31 @@ class TestPump(unittest.TestCase):
         pump.update()
         self.assertEqual(pump.runtime, 0)
         self.assertFalse(pump.is_running())
+
+    def test_add_state_callback(self):
+        pump = Pump('test_pump', 200, 3 * 3600)
+        callback = Mock()
+        pump.add_state_callback(callback)
+        pump.turn_on()
+        callback.assert_called_once_with(pump, 'ON')
+        callback.reset_mock()
+        pump.turn_off()
+        callback.assert_called_once_with(pump, 'OFF')
+    
+    def test_add_state_callbacks(self):
+        pump = Pump('test_pump', 200, 3 * 3600)
+        callback1 = Mock()
+        callback2 = Mock()
+        pump.add_state_callback(callback1)
+        pump.add_state_callback(callback2)
+        pump.turn_on()
+        callback1.assert_called_once_with(pump, 'ON')
+        callback2.assert_called_once_with(pump, 'ON')
+        callback1.reset_mock()
+        callback2.reset_mock()
+        pump.turn_off()
+        callback1.assert_called_once_with(pump, 'OFF')
+        callback2.assert_called_once_with(pump, 'OFF')
 
 class TestPumpChain(unittest.TestCase):
     def test_chain(self):

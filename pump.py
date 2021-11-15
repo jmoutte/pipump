@@ -24,9 +24,10 @@ class Pump:
         self.desired_runtime = runtime
         self.GPIO_ID = GPIO_ID
         self.current_date = datetime.today().date()
+        self._state_callbacks = []
 
         if self.GPIO_ID and not emulate_pi:
-            logging.debug(f'Setting up GPIO {self.GPIO_ID} for pump {self.name}')
+            logging.debug(f'setting up GPIO {self.GPIO_ID} for pump {self.name}')
             GPIO.setup(self.GPIO_ID, GPIO.OUT, initial=GPIO.HIGH)
     
     def should_run(self):
@@ -64,25 +65,32 @@ class Pump:
     def is_chained(self):
         return self.chained_to != None
     
+    def add_state_callback(self, callback):
+        self._state_callbacks.append(callback)
+    
     def turn_on(self):
         if not self.is_running():
-            logging.info(f'Starting pump {self.name}')
+            logging.info(f'starting pump {self.name}')
             # Call GPIO to turn the pump on
             if self.GPIO_ID and not emulate_pi:
-                logging.debug(f'Setting GPIO {self.GPIO_ID} to LOW for pump {self.name}')
+                logging.debug(f'setting GPIO {self.GPIO_ID} to LOW for pump {self.name}')
                 GPIO.output(self.GPIO_ID, GPIO.LOW)
             self.on_since = time.time()
+            for cb in self._state_callbacks:
+                cb(self, 'ON')
     
     def turn_off(self):
         if self.is_running():
             ran_for = time.time() - self.on_since
-            logging.info(f'Stopping pump {self.name}, ran for {round(ran_for)} seconds, day runtime {round(self.runtime)} seconds')
+            logging.info(f'stopping pump {self.name}, ran for {round(ran_for)} seconds, day runtime {round(self.runtime)} seconds')
             # Call GPIO to turn the pump off
             if self.GPIO_ID and not emulate_pi:
-                logging.debug(f'Setting GPIO {self.GPIO_ID} to HIGH for pump {self.name}')
+                logging.debug(f'setting GPIO {self.GPIO_ID} to HIGH for pump {self.name}')
                 GPIO.output(self.GPIO_ID, GPIO.HIGH)
             self.runtime += ran_for
             self.on_since = None
+            for cb in self._state_callbacks:
+                cb(self, 'OFF')
 
     def update(self):
         if self.is_running():
@@ -92,10 +100,10 @@ class Pump:
         
         now = datetime.today().date()
         if self.current_date != now:
-            logging.debug(f'Date changed to next day for pump {self.name}, resetting counters and turning off if running')
+            logging.debug(f'date changed to next day for pump {self.name}, resetting counters and turning off if running')
             self.turn_off()
             # Reset counters
             self.runtime = 0
             self.current_date = now            
 
-        logging.debug(f'Pump {self.name} updated, day runtime {round(self.runtime)}, desired {self.desired_runtime}, running {self.is_running()}')
+        logging.debug(f'pump {self.name} updated, day runtime {round(self.runtime)}, desired {self.desired_runtime}, running {self.is_running()}')
