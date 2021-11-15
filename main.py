@@ -98,8 +98,14 @@ device = config.load_pvsystem()
 mqtt_client = config.load_mqttclient()
 mqtt_client.attach(pumps, on_mode_changed, on_switch_command)
 
-main_pump = pumps[0]
-aux_pump = pumps[1]
+# FIXME: need to find a better way to implement that logic
+main_pump = None
+aux_pump = None
+for p in pumps:
+    if p.is_chained():
+        aux_pump = p
+    else:
+        main_pump = p
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
