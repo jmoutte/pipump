@@ -1,3 +1,4 @@
 - Make it so that pumps are being shutdown one by one, starting by chained ones
-- Read pump configuration from a config file
 - Persist state on disk to support program restart
+- Add sensor to report goal progress for the day
+- Add sensor to report power throttle
