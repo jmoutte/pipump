@@ -2,8 +2,9 @@ from collections import deque
 from statistics import mean
 
 class PVSystem:
-    _consumption_readings = deque([], maxlen=5)
-    _production_readings = deque([], maxlen=5)
+    def __init__(self):
+        self._consumption_readings = deque([], maxlen=5)
+        self._production_readings = deque([], maxlen=5)
 
     @property
     def consumption(self):
