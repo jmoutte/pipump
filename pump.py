@@ -15,21 +15,26 @@ class Pump:
     runtime = 0
     on_since = None
     chained_to = None
-    GPIO_ID = None
-    current_date = None
     
     def __init__(self, name, power, runtime, GPIO_ID = None):
         self.power = power
         self.name = name
         self.desired_runtime = runtime
-        self.GPIO_ID = GPIO_ID
-        self.current_date = datetime.today().date()
+        self._GPIO_ID = GPIO_ID
+        self._current_date = datetime.today().date()
         self._state_callbacks = []
 
-        if self.GPIO_ID and not emulate_pi:
-            logging.debug(f'setting up GPIO {self.GPIO_ID} for pump {self.name}')
-            GPIO.setup(self.GPIO_ID, GPIO.OUT, initial=GPIO.HIGH)
+        if self._GPIO_ID and not emulate_pi:
+            logging.debug(f'setting up GPIO {self._GPIO_ID} for pump {self.name}')
+            GPIO.setup(self._GPIO_ID, GPIO.OUT, initial=GPIO.HIGH)
     
+    @property
+    def goal_progress(self):
+        runtime = self.runtime
+        if self.on_since:
+            runtime += time.time() - self.on_since
+        return round(runtime * 100 / self.desired_runtime)
+
     def should_run(self):
         if self.chained_to and not self.chained_to.should_run():
             return False
@@ -72,9 +77,9 @@ class Pump:
         if not self.is_running():
             logging.info(f'starting pump {self.name}')
             # Call GPIO to turn the pump on
-            if self.GPIO_ID and not emulate_pi:
-                logging.debug(f'setting GPIO {self.GPIO_ID} to LOW for pump {self.name}')
-                GPIO.output(self.GPIO_ID, GPIO.LOW)
+            if self._GPIO_ID and not emulate_pi:
+                logging.debug(f'setting GPIO {self._GPIO_ID} to LOW for pump {self.name}')
+                GPIO.output(self._GPIO_ID, GPIO.LOW)
             self.on_since = time.time()
             for cb in self._state_callbacks:
                 cb(self, 'ON')
@@ -84,9 +89,9 @@ class Pump:
             ran_for = time.time() - self.on_since
             logging.info(f'stopping pump {self.name}, ran for {round(ran_for)} seconds, day runtime {round(self.runtime)} seconds')
             # Call GPIO to turn the pump off
-            if self.GPIO_ID and not emulate_pi:
-                logging.debug(f'setting GPIO {self.GPIO_ID} to HIGH for pump {self.name}')
-                GPIO.output(self.GPIO_ID, GPIO.HIGH)
+            if self._GPIO_ID and not emulate_pi:
+                logging.debug(f'setting GPIO {self._GPIO_ID} to HIGH for pump {self.name}')
+                GPIO.output(self._GPIO_ID, GPIO.HIGH)
             self.runtime += ran_for
             self.on_since = None
             for cb in self._state_callbacks:
@@ -99,11 +104,11 @@ class Pump:
                 self.turn_off()
         
         now = datetime.today().date()
-        if self.current_date != now:
+        if self._current_date != now:
             logging.debug(f'date changed to next day for pump {self.name}, resetting counters and turning off if running')
             self.turn_off()
             # Reset counters
             self.runtime = 0
-            self.current_date = now            
+            self._current_date = now            
 
         logging.debug(f'pump {self.name} updated, day runtime {round(self.runtime)}, desired {self.desired_runtime}, running {self.is_running()}')

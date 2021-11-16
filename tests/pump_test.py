@@ -29,11 +29,11 @@ class TestPump(unittest.TestCase):
         self.assertEqual(pump.desired_runtime, 3 * 3600)
         self.assertIsNone(pump.on_since)
         self.assertIsNone(pump.chained_to)
-        self.assertIsNone(pump.GPIO_ID)
+        self.assertIsNone(pump._GPIO_ID)
     
     def test_initial_values_with_GPIO(self):
         pump = Pump('test_pump', 200, 3 * 3600, 15)
-        self.assertEqual(pump.GPIO_ID, 15)
+        self.assertEqual(pump._GPIO_ID, 15)
 
     def test_can_run_with_enough_power_when_off(self):
         pump = Pump('test_pump', 200, 3 * 3600)
@@ -133,6 +133,16 @@ class TestPump(unittest.TestCase):
         pump.turn_off()
         callback1.assert_called_once_with(pump, 'OFF')
         callback2.assert_called_once_with(pump, 'OFF')
+    
+    def test_goal_progress(self):
+        pump = Pump('test_pump', 200, 1000)
+        self.assertEqual(pump.goal_progress, 0)
+        pump.turn_on()
+        self.emulated_time += 200
+        self.assertEqual(pump.goal_progress, 20)
+        self.emulated_time += 200
+        pump.turn_off()
+        self.assertEqual(pump.goal_progress, 40)
 
 class TestPumpChain(unittest.TestCase):
     def test_chain(self):
