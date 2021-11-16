@@ -85,7 +85,7 @@ class MQTTClient():
 
         if self._discovery:
             device = {}
-            device['identifiers'] = [ f'pipump.{self._uid}.{pump.name}' ]
+            device['identifiers'] = [ f'pipump.{self._uid}_{pump.name}' ]
             device['model'] = 'Water pump'
             device['name'] = 'Pump ' + pump.name
             device['suggested_area'] = 'Swimming pool'
@@ -93,7 +93,7 @@ class MQTTClient():
 
             payload = {}
             payload['name'] = 'Daily goal progress'
-            payload['unique_id'] = f'pipump.{self._uid}.{pump.name}'
+            payload['unique_id'] = f'pipump.{self._uid}_{pump.name}'
             payload['icon'] = 'mdi:progress-check'
             payload['entity_category'] = 'diagnostic'
             payload['unit_of_measurement'] = '%'
@@ -109,7 +109,7 @@ class MQTTClient():
 
         if self._discovery:
             device = {}
-            device['identifiers'] = [ f'pipump.{self._uid}.{pump.name}' ]
+            device['identifiers'] = [ f'pipump.{self._uid}_{pump.name}' ]
             device['model'] = 'Water pump'
             device['name'] = 'Pump ' + pump.name
             device['suggested_area'] = 'Swimming pool'
@@ -117,7 +117,7 @@ class MQTTClient():
 
             payload = {}
             payload['name'] = 'Pump ' + pump.name
-            payload['unique_id'] = f'pipump.{self._uid}.{pump.name}'
+            payload['unique_id'] = f'pipump.{self._uid}_{pump.name}'
             payload['icon'] = 'mdi:engine'
             payload['entity_category'] = 'config'
             payload['command_topic'] = base_topic + '/set'
