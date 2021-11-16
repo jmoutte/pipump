@@ -80,12 +80,36 @@ class MQTTClient():
         self._client.subscribe(f'{base_topic}/set')
         self._client.publish(f'{base_topic}/state', 'AUTO', retain=True)
 
+    def announce_sensor(self, pump):
+        base_topic = f'{self._discovery_prefix}/sensor/pipump_{self._uid}/{pump.name}'
+
+        if self._discovery:
+            device = {}
+            device['identifiers'] = [ f'pipump.{self._uid}.{pump.name}' ]
+            device['model'] = 'Water pump'
+            device['name'] = 'Pump ' + pump.name
+            device['suggested_area'] = 'Swimming pool'
+            device['via_device'] = f'pipump.{self._uid}'
+
+            payload = {}
+            payload['name'] = 'Daily goal progress'
+            payload['unique_id'] = f'pipump.{self._uid}.{pump.name}'
+            payload['icon'] = 'mdi:progress-check'
+            payload['entity_category'] = 'diagnostic'
+            payload['unit_of_measurement'] = '%'
+            payload['state_topic'] = base_topic + '/state'
+            payload['device'] = device
+
+            self._client.publish(f'{base_topic}/config', json.dumps(payload), retain=True)
+        
+        self._client.publish(f'{base_topic}/state', pump.goal_progress, retain=True)
+
     def announce_pump(self, pump):
         base_topic = f'{self._discovery_prefix}/switch/pipump_{self._uid}/{pump.name}'
 
         if self._discovery:
             device = {}
-            device['identifiers'] = [ f'pipump.{self._uid}{pump.name}' ]
+            device['identifiers'] = [ f'pipump.{self._uid}.{pump.name}' ]
             device['model'] = 'Water pump'
             device['name'] = 'Pump ' + pump.name
             device['suggested_area'] = 'Swimming pool'
@@ -93,7 +117,7 @@ class MQTTClient():
 
             payload = {}
             payload['name'] = 'Pump ' + pump.name
-            payload['unique_id'] = f'pipump.{self._uid}{pump.name}'
+            payload['unique_id'] = f'pipump.{self._uid}.{pump.name}'
             payload['icon'] = 'mdi:engine'
             payload['entity_category'] = 'config'
             payload['command_topic'] = base_topic + '/set'
@@ -112,6 +136,7 @@ class MQTTClient():
             self.announce_select()
             for p in self._pumps:
                 self.announce_pump(p)
+                self.announce_sensor(p)
 
     async def task(self):
         self._client.connect(self._host, self._port, self._timeout)
