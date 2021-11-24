@@ -108,6 +108,23 @@ class TestPump(unittest.TestCase):
         pump.update()
         self.assertEqual(pump.runtime, 0)
         self.assertFalse(pump.is_running())
+    
+    def test_update_runs_callback_when_running(self):
+        pump = Pump('test_pump', 200, 1000)
+        callback = Mock()
+        pump.add_update_callback(callback)
+        pump.turn_on()
+        self.emulated_time += 100
+        pump.update()
+        callback.assert_called_once_with(pump, 10)
+    
+    def test_update_does_not_runs_callback_when_off(self):
+        pump = Pump('test_pump', 200, 1000)
+        callback = Mock()
+        pump.add_update_callback(callback)
+        self.emulated_time += 100
+        pump.update()
+        callback.assert_not_called()
 
     def test_add_state_callback(self):
         pump = Pump('test_pump', 200, 3 * 3600)

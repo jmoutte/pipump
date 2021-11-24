@@ -23,6 +23,7 @@ class Pump:
         self._GPIO_ID = GPIO_ID
         self._current_date = datetime.today().date()
         self._state_callbacks = []
+        self._update_callbacks = []
 
         if self._GPIO_ID and not emulate_pi:
             logging.debug(f'setting up GPIO {self._GPIO_ID} for pump {self.name}')
@@ -73,6 +74,9 @@ class Pump:
     def add_state_callback(self, callback):
         self._state_callbacks.append(callback)
     
+    def add_update_callback(self, callback):
+        self._update_callbacks.append(callback)
+    
     def turn_on(self):
         if not self.is_running():
             logging.info(f'starting pump {self.name}')
@@ -98,17 +102,25 @@ class Pump:
                 cb(self, 'OFF')
 
     def update(self):
+        notify = False
         if self.is_running():
+            notify = True
             ran_for = time.time() - self.on_since
             if self.runtime + ran_for >= self.desired_runtime:
                 self.turn_off()
         
         now = datetime.today().date()
         if self._current_date != now:
+            notify = True
             logging.debug(f'date changed to next day for pump {self.name}, resetting counters and turning off if running')
             self.turn_off()
             # Reset counters
             self.runtime = 0
             self._current_date = now            
+
+        if notify:
+            progress = self.goal_progress
+            for cb in self._update_callbacks:
+                cb(self, progress)
 
         logging.debug(f'pump {self.name} updated, day runtime {round(self.runtime)}, desired {self.desired_runtime}, running {self.is_running()}')
