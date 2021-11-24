@@ -18,18 +18,23 @@ class MQTTClient():
         self._mode_changed_callback = None
         self._switch_callback = None
 
-        self._client = mqtt.Client(client_id = f'pipump_{self._uid}', clean_session=True, userdata=None, protocol=4)
+        self._client = mqtt.Client(client_id = f'pipump_{self._uid}', clean_session = True, userdata = None, protocol = 4)
         if self._username:
-            self._client.username_pw_set(self._username, password=self._password)
+            self._client.username_pw_set(username = self._username, password = self._password)
         self._client.on_connect = self.on_connected
     
     def attach(self, pumps, mode_callback, switch_callback):
         self._pumps = pumps
         for p in pumps:
             p.add_state_callback(self.on_pump_state_changed)
+            p.add_update_callback(self.on_pump_updated)
         self._mode_changed_callback = mode_callback
         self._switch_callback = switch_callback
     
+    def on_pump_updated(self, pump, progress):
+        topic = f'{self._discovery_prefix}/sensor/pipump_{self._uid}/{pump.name}/state'
+        self._client.publish(topic, progress, retain=True)
+
     def on_pump_state_changed(self, pump, state):
         topic = f'{self._discovery_prefix}/switch/pipump_{self._uid}/{pump.name}/state'
         self._client.publish(topic, state, retain=True)
