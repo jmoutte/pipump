@@ -6,14 +6,14 @@ import paho.mqtt.client as mqtt
 
 class MQTTClient():
     def __init__(self, options):
-        self._host = options.get('host') or '127.0.0.1'
-        self._port = options.get('port') or 1883
-        self._username = options.get('username') or None
-        self._password = options.get('password') or None
-        self._timeout = options.get('timeout') or 60
-        self._uid = options.get('uid') or '12345'
-        self._discovery = options.get('discovery') or True
-        self._discovery_prefix = options.get('discovery_prefix') or 'homeassistant'
+        self._host = options.get('host', '127.0.0.1')
+        self._port = options.get('port', 1883)
+        self._username = options.get('username', None)
+        self._password = options.get('password', None)
+        self._timeout = options.get('timeout', 60)
+        self._uid = options.get('uid', '12345')
+        self._discovery = options.get('discovery', True)
+        self._discovery_prefix = options.get('discovery_prefix', 'homeassistant')
         self._pumps = []
         self._mode_changed_callback = None
         self._switch_callback = None
