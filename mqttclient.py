@@ -144,11 +144,26 @@ class MQTTClient():
                 self.announce_sensor(p)
 
     async def task(self):
-        self._client.connect(self._host, self._port, self._timeout)
         try:
+            try:
+                logging.debug(f'connecting to MQTT server {self._host}:{self._port}')
+                self._client.connect(self._host, self._port, self._timeout)
+                logging.debug(f'connected to MQTT server {self._host}:{self._port}')
+            except (OSError, mqtt.WebsocketConnectionError):
+                logging.debug('initial MQTT connection failed')
             while True:
-                self._client.loop(timeout=1, max_packets=1)
-                await asyncio.sleep(0.1)
+                rc = self._client.loop(timeout=1, max_packets=1)
+                if rc > 0:
+                    logging.debug('connection to MQTT server lost, will retry')
+                    await asyncio.sleep(30)
+                    try:
+                        logging.debug(f'reconnecting to MQTT server {self._host}:{self._port}')
+                        self._client.reconnect()
+                        logging.debug(f'connected to MQTT server {self._host}:{self._port}')
+                    except (OSError, mqtt.WebsocketConnectionError):
+                        logging.debug('reconnection attempt failed, will try again')
+                else:
+                    await asyncio.sleep(0.1)
         except asyncio.CancelledError:
             logging.debug('mqtt_loop task cancelled')
             raise
