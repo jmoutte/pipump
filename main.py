@@ -2,6 +2,7 @@ from config import Config
 
 import signal
 import sys
+import os
 import logging
 import asyncio
 
@@ -9,8 +10,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler("debug.log"),
-        logging.StreamHandler(sys.stdout)
+        logging.FileHandler(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'debug.log'))
     ]
 )
 

@@ -1,0 +1,13 @@
+[Unit]
+Description=PiPump
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+User=%i
+ExecStart=/usr/bin/python3 -u /home/pi/pipump/main.py
+
+[Install]
+WantedBy=multi-user.target
