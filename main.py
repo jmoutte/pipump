@@ -73,7 +73,7 @@ async def auto_loop():
                 p.update() # Potentially stops a pump that reached desired runtime, update counters
             availability = device.update()
             if availability <= 0:
-                if aux_pump.is_running():
+                if aux_pump and aux_pump.is_running():
                     aux_pump.turn_off()
                     del device.consumption
                 elif main_pump.is_running():
