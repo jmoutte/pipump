@@ -96,7 +96,8 @@ config = Config('config.yaml')
 pumps = config.load_pumps()
 device = config.load_pvsystem()
 mqtt_client = config.load_mqttclient()
-mqtt_client.attach(pumps, on_mode_changed, on_switch_command)
+if mqtt_client:
+    mqtt_client.attach(pumps, on_mode_changed, on_switch_command)
 
 # FIXME: need to find a better way to implement that logic
 main_pump = None
@@ -113,7 +114,8 @@ if __name__ == '__main__':
     if mode == 'AUTO':
         auto_task = loop.create_task(auto_loop())
 
-    mqtt_task = loop.create_task(mqtt_client.task())
+    if mqtt_client:
+        mqtt_task = loop.create_task(mqtt_client.task())
 
     loop.run_forever()
     loop.close()
