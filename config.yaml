@@ -9,6 +9,9 @@ mqtt:
 pvsystem:
   type: envoy
   ip: 192.168.10.12
+  user: YOUR_ENLIGHTEN_USER
+  password: YOUR_ENLIGHTEN_PASSWORD
+  serial: 1234567890
 pumps:
   - name: Main
     power: 1650
