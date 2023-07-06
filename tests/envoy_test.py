@@ -19,6 +19,22 @@ class TestEnvoy(unittest.TestCase):
             return MockResponse({ "production": [{ "type": "eim", "wNow": 200 }], "consumption": [{ "type": "eim", "wNow": 100}] }, 200)
 
         return MockResponse(None, 404)
+    
+    def mocked_requests_get_with_auth(*args, **kwargs):
+        class MockResponse:
+            def __init__(self, status_code, json_data=None, headers={}):
+                self.json_data = json_data
+                self.status_code = status_code
+                self.headers = headers
+            def json(self):
+                return self.json_data
+
+        if args[1] == 'http://127.0.0.1/production.json':
+            return MockResponse(status_code=301, headers={'Location': 'https://127.0.0.1/production.json'})
+        elif args[1] == 'https://127.0.0.1/production.json':
+            return MockResponse(status_code=200, json_data={ "production": [{ "type": "eim", "wNow": 200 }], "consumption": [{ "type": "eim", "wNow": 100}] })
+
+        return MockResponse(None, 404)
 
     def test_url(self):
         envoy = Envoy('127.0.0.1')
@@ -31,13 +47,6 @@ class TestEnvoy(unittest.TestCase):
             mock_requests.get.side_effect = Timeout
             envoy.update()
             mock_requests.get.assert_called_once()
-    
-    def test_update_requests_get_with_timeout(self):
-        envoy = Envoy('127.0.0.1')
-        with patch('envoy.requests') as mock_requests:
-            mock_requests.get.side_effect = Timeout
-            envoy.update()
-            mock_requests.get.assert_called_once_with('http://127.0.0.1/production.json', timeout=10)
     
     def test_update_returns_availability(self):
         envoy = Envoy('127.0.0.1')

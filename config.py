@@ -42,6 +42,6 @@ class Config():
         try:
             pvsystem = self._config['pvsystem']
             if pvsystem['type'] == 'envoy':
-                return Envoy(pvsystem['ip'])
+                return Envoy(ip=pvsystem['ip'], user=pvsystem['user'], password=pvsystem['password'], serial=pvsystem['serial'])
         except KeyError as err:
             logging.warning('missing attributes for pvsystem')
